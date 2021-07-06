@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """This node publishes a set of waypoint message to the 
 
 How to use. First publish a test set of waypoints to "/input_test_waypoints"
