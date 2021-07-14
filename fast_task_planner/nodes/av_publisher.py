@@ -2,13 +2,18 @@
 """This node publishes a set of waypoint message to the 
 
 How to use. First publish a test set of waypoints to "/input_test_waypoints"
->>> rostopic pub /input_test_waypoints std_msgs/Float64MuiArray "layout:
+>>> rostopic pub /input_test_waypoints std_msgs/Float64MultiArray "layout:
   dim:
   - label: ''
     size: 0
     stride: 0
   data_offset: 0
-data: [741046.191, 3391408.431, 741045.581, 3391504.677, 741055.435, 3391455.232]" 
+data: [741046.191, 3391408.431, 0, 741045.581, 3391504.677, 1, 741055.435, 3391455.232, 0]" 
+
+NOTE: waypoint type
+0 = nothing
+1 = NOI
+2 = checkpoint
 
 Now echo "/taskplanner_to_av" to see 
 >>> rostopic echo /taskplanner_to_av
@@ -19,7 +24,7 @@ from std_msgs.msg import Float64MultiArray, MultiArrayDimension
 from nav_msgs.msg import Path
 
 # Test waypoints for the a
-array = [741046.191, 3391408.431, 741045.581, 3391504.677, 741055.435, 3391455.232]
+#array = [741046.191, 3391408.431, 741045.581, 3391504.677, 741055.435, 3391455.232]
 
 class PlannerAVInterface:
     
@@ -27,7 +32,7 @@ class PlannerAVInterface:
         self.sub = rospy.Subscriber('input_test_waypoints', Float64MultiArray, self.input_callback)
         self.pub = rospy.Publisher('taskplanner_to_av', Float64MultiArray, queue_size=10, latch=True)
         rospy.init_node('taskplanner_to_av_talker', anonymous=True)
-
+        rospy.loginfo("RUNNING NODE")
 
     def input_callback(self, msg):
         
@@ -52,8 +57,8 @@ class PlannerAVInterface:
         test_msg.layout.dim[0].size = int(len(test_msg.data)/2)
         test_msg.layout.dim[0].stride = len(test_msg.data)   # num_of_waypoints x 2
         test_msg.layout.dim[1].label = "single_waypoint_packet"
-        test_msg.layout.dim[1].size = 2     # utm X and utm Y
-        test_msg.layout.dim[1].stride = 2   
+        test_msg.layout.dim[1].size = 3     # utm X and utm Y and now type
+        test_msg.layout.dim[1].stride = 3   
         
         hello_str = "task planner publishing waypoints to av %s" % rospy.get_time()
         rospy.loginfo(hello_str)
