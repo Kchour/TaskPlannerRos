@@ -12,8 +12,8 @@ data: [741046.191, 3391408.431, 0, 741045.581, 3391504.677, 1, 741055.435, 33914
 
 NOTE: waypoint type
 0 = nothing
-1 = NOI
-2 = checkpoint
+1 = checkpoing
+2 = NAI
 
 Now echo "/taskplanner_to_av" to see 
 >>> rostopic echo /taskplanner_to_av

@@ -1,0 +1,4 @@
+<launch>
+  <node name="task_planner_node" pkg="fast_task_planner" type="task_planner_publisher.py" cwd="node" output="screen"/>
+  <node name="test_mission_planner_node" pkg="fast_task_planner" type="test_mission_publisher.py" cwd="node" output="screen"/>
+</launch>

@@ -1,0 +1,13 @@
+triangle_ID,triangle_type,type_ID,PhaseID 
+74,checkpoint,1,2
+3425,checkpoint,2,3
+1720,checkpoint,3,2
+2546,checkpoint,4,3
+1532,checkpoint,5,2
+590,checkpoint,6,2
+2976,checkpoint,7,2
+3118,checkpoint,8,3
+3352,NAI,1,2
+2072,NAI,2,3
+102,NAI,3,2
+3120,NAI,4,3
