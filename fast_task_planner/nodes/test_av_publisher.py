@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """This node publishes a set of waypoint message to the 
 
-How to use. First publish a test set of waypoints to "/input_test_waypoints"
->>> rostopic pub /input_test_waypoints std_msgs/Float64MultiArray "layout:
+How to use. First publish a test set of waypoints to "/input_test_waypoints_av"
+>>> rostopic pub /input_test_waypoints_av std_msgs/Float64MultiArray "layout:
   dim:
   - label: ''
     size: 0
@@ -15,13 +15,12 @@ NOTE: waypoint type
 1 = checkpoing
 2 = NAI
 
-Now echo "/taskplanner_to_av" to see 
+Now echo "/taskplanner_to_av" to see the result
 >>> rostopic echo /taskplanner_to_av
 
 """
 import rospy
 from std_msgs.msg import Float64MultiArray, MultiArrayDimension
-from nav_msgs.msg import Path
 
 # Test waypoints for the a
 #array = [741046.191, 3391408.431, 741045.581, 3391504.677, 741055.435, 3391455.232]
@@ -29,7 +28,7 @@ from nav_msgs.msg import Path
 class PlannerAVInterface:
     
     def __init__(self):
-        self.sub = rospy.Subscriber('input_test_waypoints', Float64MultiArray, self.input_callback)
+        self.sub = rospy.Subscriber('input_test_waypoints_av', Float64MultiArray, self.input_callback)
         self.pub = rospy.Publisher('taskplanner_to_av', Float64MultiArray, queue_size=10, latch=True)
         rospy.init_node('taskplanner_to_av_talker', anonymous=True)
         rospy.loginfo("RUNNING NODE")
@@ -54,7 +53,7 @@ class PlannerAVInterface:
         # create 2 dimensions in the dim array
         test_msg.layout.dim = [MultiArrayDimension(), MultiArrayDimension()] 
         test_msg.layout.dim[0].label = "num_of_waypoints"
-        test_msg.layout.dim[0].size = int(len(test_msg.data)/2)
+        test_msg.layout.dim[0].size = int(len(test_msg.data)/3)
         test_msg.layout.dim[0].stride = len(test_msg.data)   # num_of_waypoints x 2
         test_msg.layout.dim[1].label = "single_waypoint_packet"
         test_msg.layout.dim[1].size = 3     # utm X and utm Y and now type

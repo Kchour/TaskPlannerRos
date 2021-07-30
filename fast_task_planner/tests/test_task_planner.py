@@ -43,7 +43,10 @@ class TestTaskPlannerPublisher(unittest.TestCase):
 
     def test_failure_out_of_order(self):
         """this case will fail!
+        
         """
+        phase_msg = Int64()
+
         # third phase
         phase_msg.data = 3
         self.pub.publish(phase_msg)

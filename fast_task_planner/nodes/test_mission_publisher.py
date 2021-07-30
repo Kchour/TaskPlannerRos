@@ -14,7 +14,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..',))
 print(os.path.join(os.path.dirname(__file__), '..',))
 
 from config.vehicle_data import mission_plans
-from fastAGC.algorithm_query_single_fixed import AlgorithmFixedSingle
 
 class TestMissionPlanner:
     
@@ -84,23 +83,9 @@ class TestMissionPlanner:
         self.pub.publish(mission_plan_array_msg)
         rospy.loginfo("PUBLISHED MISSON TO TASKPLANNER")
 
-
-
-#def talker():
-#    rospy.Subscriber('input_waypoints', Path, input_callback)
-#    pub = rospy.Publisher('taskplanner_to_av', Float64MultiArray, queue_size=10, latch=True)
-#    rospy.init_node('taskplanner_to_av_talker', anonymous=True)
-#    rate = rospy.Rate(10) # 10hz
-#    while not rospy.is_shutdown():
-#        hello_str = "task planner publishing waypoints to av %s" % rospy.get_time()
-#        rospy.loginfo(hello_str)
-#        pub.publish(test_msg)
-#        rate.sleep()
-
 if __name__ == '__main__':
     try:
         pav = TestMissionPlanner()
         rospy.spin()
-        #talker()
     except rospy.ROSInterruptException:
         pass

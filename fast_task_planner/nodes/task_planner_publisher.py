@@ -26,23 +26,33 @@ from nav_msgs.msg import Path                 # GV message
 # add config folder to path
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..',))
-print(os.path.join(os.path.dirname(__file__), '..',))
 
 from config.vehicle_data import mission_plans, vehicles_container as vc, rewards # rewards only for plotting
+
+# ignore import error if library not installed
 from fastAGC.algorithm_query_single_fixed import AlgorithmFixedSingle
 import fastAGC.config as cfg
 cfg.DEBUGGING = True
+
 from fast_task_planner.msg import MissionPlanArray
 
-class PlannerAVInterface:
-    
+class PlannerTaskInterface:
+    """Wrapper class around the fastAGC library. Will publish to the
+        av and gv topics a set of waypoints, for which a team will meet
+        at a rendezvous point
+
+    """
     def __init__(self):
+        """Init node, create publishers and subscribers
+
+        """
         # make sure node is init first
         rospy.init_node('task_planner_node', anonymous=True)
         rospy.loginfo("RUNNING TASK_PLANNING NODE")
 
         # create algorithm object
         self.alg = AlgorithmFixedSingle(vehicle_container=vc)
+        rospy.loginfo("Skipped initializing FASTAGC")
 
         # create pub and subs
         self.pub_av = rospy.Publisher('taskplanner_to_av', Path, queue_size=10, latch=True)
@@ -51,6 +61,9 @@ class PlannerAVInterface:
 
     def input_callback(self, msg):
       """Receive mission plans, call the task planner
+
+          Saves rendezvous location into parameter server
+          so that it can be used as the starting location next time
 
       """
       rospy.loginfo("TASKPLANNER RECEIVED MISSION")
@@ -96,6 +109,7 @@ class PlannerAVInterface:
         rendez.update({gv: self.alg.veh_results(gv).waypoints[-1]})
       rospy.set_param("rendezvous", rendez)
 
+   
 #def talker():
 #    rospy.Subscriber('input_waypoints', Path, input_callback)
 #    pub = rospy.Publisher('taskplanner_to_av', Float64MultiArray, queue_size=10, latch=True)
@@ -109,7 +123,7 @@ class PlannerAVInterface:
 
 if __name__ == '__main__':
     try:
-        pav = PlannerAVInterface()
+        pav = PlannerTaskInterface()
         rospy.spin()
     except rospy.ROSInterruptException:
         pass
