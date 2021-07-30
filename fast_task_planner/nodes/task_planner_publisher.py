@@ -54,11 +54,11 @@ class PlannerTaskInterface:
         rospy.init_node('task_planner_node', anonymous=True)
         rospy.loginfo("RUNNING TASK_PLANNING NODE")
 
-        # # create algorithm object
-        # try:
-        #   self.alg = AlgorithmFixedSingle(vehicle_container=vc)
-        # except:
-        #   rospy.loginfo("Skipped initializing FASTAGC")
+        # create algorithm object
+        try:
+          self.alg = AlgorithmFixedSingle(vehicle_container=vc)
+        except:
+          rospy.loginfo("Skipped initializing FASTAGC")
 
         # create pub and subs
         self.pub_av = rospy.Publisher('taskplanner_to_av', Float64MultiArray, queue_size=10, latch=True)
