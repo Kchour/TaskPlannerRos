@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""This node publishes a set of waypoint message to the 
+"""This node publishes a set of waypoint message to a set of teams
 
 How to use. First publish a test set of waypoints to "/input_test_waypoints"
 >>> rostopic pub /input_test_waypoints std_msgs/Float64MultiArray "layout:
@@ -15,7 +15,7 @@ NOTE: waypoint type
 1 = Checkpoint
 2 = NAI
 
-Now echo "/taskplanner_to_av" to see 
+Now echo "/taskplanner_to_XX" to see the results
 >>> rostopic echo /taskplanner_to_av
 >>> rostopic echo /taskplanner_to_gv
 
