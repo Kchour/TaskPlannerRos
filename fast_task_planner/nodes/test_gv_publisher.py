@@ -21,47 +21,32 @@ Now echo "/taskplanner_to_gv" to see the result
 """
 import rospy
 from std_msgs.msg import Float64MultiArray, MultiArrayDimension
-
-# Test waypoints for the a
-#array = [741046.191, 3391408.431, 741045.581, 3391504.677, 741055.435, 3391455.232]
+from geometry_msgs.msg import PoseArray, Pose
 
 class PlannerAVInterface:
     
     def __init__(self):
         self.sub = rospy.Subscriber('input_test_waypoints_gv', Float64MultiArray, self.input_callback)
-        self.pub = rospy.Publisher('taskplanner_to_gv', Float64MultiArray, queue_size=10, latch=True)
+        self.pub = rospy.Publisher('taskplanner_to_gv1', PoseArray, queue_size=10, latch=True)
         rospy.init_node('taskplanner_to_gv_talker', anonymous=True)
         rospy.loginfo("RUNNING NODE")
 
-    def input_callback(self, msg):
-        
-        # Create and populate message
-        test_msg = Float64MultiArray()
-        test_msg.data = msg.data
+    def input_callback(self, msg):             
 
-        # specify the message layout
-        # dim[0].label  = "height"
-        # dim[0].size   = 480
-        # dim[0].stride = 3*640*480 = 921600  (note dim[0] stride is just size of image)
-        # dim[1].label  = "width"
-        # dim[1].size   = 640
-        # dim[1].stride = 3*640 = 1920
-        # dim[2].label  = "channel"
-        # dim[2].size   = 3
-        # dim[2].stride = 3
+        # create an empty PoseArray message
+        pose_array_msg = PoseArray()
 
-        # create 2 dimensions in the dim array
-        test_msg.layout.dim = [MultiArrayDimension(), MultiArrayDimension()] 
-        test_msg.layout.dim[0].label = "num_of_waypoints"
-        test_msg.layout.dim[0].size = int(len(test_msg.data)/3)
-        test_msg.layout.dim[0].stride = len(test_msg.data)   # num_of_waypoints x 2
-        test_msg.layout.dim[1].label = "single_waypoint_packet"
-        test_msg.layout.dim[1].size = 3     # utm X and utm Y and now type
-        test_msg.layout.dim[1].stride = 3   
-        
+        # unpack incoming msg and fill in pose_array_msg
+        for x, y in zip(msg.data[0::3], msg.data[1::3]):
+          pose = Pose()
+          pose.position.x = x
+          pose.position.y = y
+          pose_array_msg.poses.append(pose)
+
+
         hello_str = "task planner publishing waypoints to gv %s" % rospy.get_time()
         rospy.loginfo(hello_str)
-        self.pub.publish(test_msg)
+        self.pub.publish(pose_array_msg)
 
 #def talker():
 #    rospy.Subscriber('input_waypoints', Path, input_callback)

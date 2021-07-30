@@ -17,11 +17,12 @@ NOTE: waypoint type
 
 Now echo "/taskplanner_to_av" to see 
 >>> rostopic echo /taskplanner_to_av
+>>> rostopic echo /taskplanner_to_gv
 
 """
 import rospy
-from std_msgs.msg import Float64MultiArray    # AV message (must include noi/checkpoints see above)
-from nav_msgs.msg import Path                 # GV message
+from std_msgs.msg import Float64MultiArray, MultiArrayDimension    # AV message (must include noi/checkpoints see above)
+from geometry_msgs.msg import PoseArray, Pose                      # Gv messages
 
 # add config folder to path
 import sys, os
@@ -30,9 +31,12 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..',))
 from config.vehicle_data import mission_plans, vehicles_container as vc, rewards # rewards only for plotting
 
 # ignore import error if library not installed
-from fastAGC.algorithm_query_single_fixed import AlgorithmFixedSingle
-import fastAGC.config as cfg
-cfg.DEBUGGING = True
+try:
+  from fastAGC.algorithm_query_single_fixed import AlgorithmFixedSingle
+  import fastAGC.config as cfg
+  cfg.DEBUGGING = True
+except:
+  rospy.loginfo("fastAGC library not installed")
 
 from fast_task_planner.msg import MissionPlanArray
 
@@ -50,17 +54,61 @@ class PlannerTaskInterface:
         rospy.init_node('task_planner_node', anonymous=True)
         rospy.loginfo("RUNNING TASK_PLANNING NODE")
 
-        # create algorithm object
-        self.alg = AlgorithmFixedSingle(vehicle_container=vc)
-        rospy.loginfo("Skipped initializing FASTAGC")
+        # # create algorithm object
+        # try:
+        #   self.alg = AlgorithmFixedSingle(vehicle_container=vc)
+        # except:
+        #   rospy.loginfo("Skipped initializing FASTAGC")
 
         # create pub and subs
-        self.pub_av = rospy.Publisher('taskplanner_to_av', Path, queue_size=10, latch=True)
-        self.pub_gv = rospy.Publisher('taskplanner_to_gv', Float64MultiArray, queue_size=10, latch=True)
+        self.pub_av = rospy.Publisher('taskplanner_to_av', Float64MultiArray, queue_size=10, latch=True)
+        self.pub_gv = rospy.Publisher('taskplanner_to_gv', PoseArray, queue_size=10, latch=True)
         self.sub_mission = rospy.Subscriber('missionPlanner_to_taskPlanner', MissionPlanArray, self.input_callback)
 
+        # TESTING PURPOSES INPUT TOPIC (SEE ABOVE FOR USAGE)
+        self.sub_test = rospy.Subscriber('input_test_waypoints', Float64MultiArray, self.test_input_callback)
+
+    def test_input_callback(self, msg):
+        
+        ####################################
+        # Create and populate message for AV
+        ####################################
+        test_msg = Float64MultiArray()
+        test_msg.data = msg.data
+
+        # create 2 dimensions in the dim array
+        test_msg.layout.dim = [MultiArrayDimension(), MultiArrayDimension()] 
+        test_msg.layout.dim[0].label = "num_of_waypoints"
+        test_msg.layout.dim[0].size = int(len(test_msg.data)/3)
+        test_msg.layout.dim[0].stride = len(test_msg.data)   # num_of_waypoints x 2
+        test_msg.layout.dim[1].label = "single_waypoint_packet"
+        test_msg.layout.dim[1].size = 3     # utm X and utm Y and now type
+        test_msg.layout.dim[1].stride = 3   
+                
+        #####################################
+        # Do the same for the GV 
+        #####################################
+
+        # create an empty PoseArray message
+        pose_array_msg = PoseArray()
+
+        # unpack incoming msg and fill in pose_array_msg
+        for x, y in zip(msg.data[0::3], msg.data[1::3]):
+          pose = Pose()
+          pose.position.x = x
+          pose.position.y = y
+          pose_array_msg.poses.append(pose)
+
+        hello_str = "task planner publishing waypoints to av %s" % rospy.get_time()
+        rospy.loginfo(hello_str)
+        self.pub_av.publish(test_msg)
+        
+        hello_str = "task planner publishing waypoints to gv %s" % rospy.get_time()
+        rospy.loginfo(hello_str)
+        self.pub_gv.publish(pose_array_msg)
+
     def input_callback(self, msg):
-      """Receive mission plans, call the task planner
+      """Receive mission plans, call the task planner (Must be installed)
 
           Saves rendezvous location into parameter server
           so that it can be used as the starting location next time
