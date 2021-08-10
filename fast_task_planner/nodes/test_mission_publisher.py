@@ -13,7 +13,10 @@ import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..',))
 print(os.path.join(os.path.dirname(__file__), '..',))
 
-from config.vehicle_data import mission_plans
+try:
+    from config.vehicle_data import mission_plans
+except:
+    rospy.loginfo("fastAGC library not installed")
 
 class TestMissionPlanner:
     
