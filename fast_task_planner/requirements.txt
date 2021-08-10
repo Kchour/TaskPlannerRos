@@ -1,0 +1,3 @@
+rospkg
+numpy
+matplotlib

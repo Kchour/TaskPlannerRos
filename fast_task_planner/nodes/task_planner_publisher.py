@@ -28,10 +28,10 @@ from geometry_msgs.msg import PoseArray, Pose                      # Gv messages
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..',))
 
-from config.vehicle_data import mission_plans, vehicles_container as vc, rewards # rewards only for plotting
 
 # ignore import error if library not installed
 try:
+  from config.vehicle_data import mission_plans, vehicles_container as vc, rewards # rewards only for plotting
   from fastAGC.algorithm_query_single_fixed import AlgorithmFixedSingle
   import fastAGC.config as cfg
   cfg.DEBUGGING = True
